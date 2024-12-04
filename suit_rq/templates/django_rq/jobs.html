@@ -4,13 +4,6 @@
 
 {% block extrahead %}
     {{ block.super }}
-    <script type="text/javascript">
-    (function($) {
-        $(document).ready(function($) {
-            $("tr input.action-select").actions();
-        });
-    })(django.jQuery);
-    </script>
 {% endblock %}
 
 
