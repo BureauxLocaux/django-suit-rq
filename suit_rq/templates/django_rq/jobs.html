@@ -32,7 +32,7 @@
         <a href="{% url 'rq_clear' queue_index %}" class="btn btn-warning">Empty Queue</a>
     </div>
     <div class="module" id="changelist">
-        <form id="changelist-form" class="form-inline" action="{% url 'rq_actions' queue_index %}" method="post">
+        <form id="changelist-form" class="form-inline" action="{% url 'rq_confirm_action' queue_index %}" method="post">
             {% csrf_token %}
             <div class="actions">
                 <label>
