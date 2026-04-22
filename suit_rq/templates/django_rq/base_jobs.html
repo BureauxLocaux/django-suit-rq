@@ -1,0 +1,151 @@
+{% extends "django_rq/base_django_rq.html" %}
+
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+{% endblock %}
+
+{% block extra_breadcrumbs %}
+    <li class="active">
+        <span class="divider">»</span>
+        <a href="{% url 'rq_jobs' queue_index %}">Jobs in {{ queue.name }}</a>
+    </li>
+{% endblock %}
+
+{% block content_title %}<h1>{{ job_status }} jobs in {{ queue.name }}</h1>{% endblock %}
+
+{% block content %}
+
+<div id="content-main">
+    {% if job_status == "Queued" or job_status == "Finished" or job_status == "Failed" %}
+        <div class="object-tools">
+            {% if job_status == "Queued" %}
+                <a href="{% url 'rq_clear' queue_index %}" class="btn btn-warning">Empty Queue</a>
+            {% else %}
+                <a href="{% url 'rq_requeue_all' queue_index %}" class="btn btn-warning">Requeue All</a>
+                <a href="{% url 'rq_delete_failed_jobs' queue_index %}" class="btn btn-warning">Delete All</a>
+            {% endif %}
+           
+        </div>
+    {% endif %}
+    <div class="module" id="changelist">
+        <form id="changelist-form" class="form-inline" action="{% url 'rq_confirm_action' queue_index %}" method="post">
+            {% csrf_token %}
+            <div class="actions">
+                <label>
+                    <span class="action-label">Action:</span>
+                    <select name="action">
+                        <option value="" selected="selected">---------</option>
+                        <option value="delete">Delete</option>
+                        {% if job_status == 'Failed' or job_status == 'Finished' %}
+                            <option value="requeue">Requeue</option>
+                        {% elif job_status == 'Started' %}
+                            <option value="stop">Stop</option>
+                        {% endif %}
+                    </select>
+                </label>
+                &nbsp;
+                <button type="submit" class="btn" title="Execute selected action" name="index" value="0">Go</button>
+            </div>
+            <div class="results">
+                <table id="result_list" class="table table-striped table-bordered table-hover table-condensed">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="action-checkbox-column">
+                                <div class="text">
+                                    <span><input type="checkbox" id="action-toggle" style="display: inline-block;"></span>
+                                </div>
+                                <div class="clear"></div>
+                            </th>
+                            {% if job_status == "Started" %}
+                                <th><div class="text"><span>Execution ID</span></div></th>
+                            {% else %}
+                                <th><div class="text"><span>ID</span></div></th>
+                            {% endif %}
+                            <th><div class="text"><span>Created</span></div></th>
+                            {% if job_status == "Started" %}
+                                <th><div class="text"><span>Last Heartbeat</span></div></th>
+                            {% endif %}
+                            {% if job_status != "Deferred" and job_status != "Scheduled" %}
+                                <th><div class="text"><span>Enqueued</span></div></th>
+                            {% elif job_status == "Scheduled" %}
+                                <th><div class="text"><span>Scheduled</span></div></th>
+                            {% endif %}
+                            {% if job_status == "Failed" or job_status == "Finished" %}
+                                <th><div class="text"><span>Ended</span></div></th>
+                            {% endif %}
+                            <th><div class="text"><span>Status</span></div></th>
+                            <th><div class="text"><span>Callable</span></div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if job_status == "Started" %}
+                            {% for execution in executions %}
+                                <tr class="{% cycle 'row1' 'row2' %}">
+                                    <td class="action-checkbox">
+                                        <input class="action-select" name="_selected_action" type="checkbox" value="{{ execution.job.id }}">
+                                    </td>
+                                    <th>
+                                        <a href="{% url 'rq_job_detail' queue_index execution.job_id %}">
+                                            {{ execution.id }}
+                                        </a>
+                                    </th>
+                                    <td>{{ execution.created_at }}</td>
+                                    <td>{{ execution.last_heartbeat }}</td>
+                                    <td>{{ execution.job.enqueued_at }}</td>
+                                    <td>{{ execution.job.get_status.value }}</td>
+                                    <td>{{ execution.job.func_name }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            {% for job in jobs %}
+                                <tr class="{% cycle 'row1' 'row2' %}">
+                                    <td class="action-checkbox">
+                                        <input class="action-select" name="_selected_action" type="checkbox" value="{{ job.id }}">
+                                    </td>
+                                    <th>
+                                        <a href="{% url 'rq_job_detail' queue_index job.id %}">
+                                            {{ job.id }}
+                                        </a>
+                                    </th>
+                                    <td>{{ job.created_at }}</td>
+                                    {% if job_status != "Deferred" and job_status != "Scheduled" %}
+                                        <td>{{ job.enqueued_at }}</td>
+                                    {% elif job_status == "Scheduled" %}
+                                        <td>{{ job.scheduled_at }}</td>
+                                    {% endif %}
+                                    {% if job_status == "Failed" or job_status == "Finished" %}
+                                        <td>{{ job.ended_at }}</td>
+                                    {% endif %}
+                                    <td>{{ job.get_status.value }}</td>
+                                    <td>{{ job.func_name }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-block">
+                <div class="pagination">
+                    <ul>
+                    {% for p in page_range %}
+                        {% if p == page %}
+                            <li class="active"><a href="?page={{ p }}">{{ p }}</a></li>
+                        {% elif forloop.last %}
+                            <li><a href="?page={{ p }}" class="end">{{ p }}</a></li>
+                        {% else %}
+                            <li><a href="?page={{ p }}">{{ p }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                </div>
+                <div class="pagination-info muted">
+                    {{ num_jobs }} jobs
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
