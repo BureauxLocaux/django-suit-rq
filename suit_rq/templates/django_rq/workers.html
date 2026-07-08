@@ -1,0 +1,52 @@
+{% extends "django_rq/base_django_rq.html" %}
+
+{% load static %}
+
+
+
+{% block extra_breadcrumbs %}
+    <li class="active">
+        <span class="divider">»</span>
+        <a href="{% url 'rq_workers' queue_index %}">Workers in {{ queue.name }}</a>
+    </li>
+{% endblock %}
+
+{% block content_title %}<h1>Workers in {{ queue.name }}</h1>{% endblock %}
+
+{% block content %}
+
+<div id="content-main">
+    <div class="module" id="changelist">
+        <form id="changelist-form" class="form-inline" action="{% url 'rq_confirm_action' queue_index %}" method="post">
+            {% csrf_token %}
+            <div class="results">
+                <table id="result_list" class="table table-striped table-bordered table-hover table-condensed">
+                    <thead>
+                        <tr>
+                            <th><div class="text"><span>Name</span></div></th>
+                            <th><div class="text"><span>State</span></div></th>
+                            <th><div class="text"><span>Birth</span></div></th>
+                            <th><div class="text"><span>PID</span></div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for worker in workers %}
+                            <tr class="{% cycle 'row1' 'row2' %}">
+                                <th>
+                                    <a href="{% url 'rq_worker_details' queue_index worker.key %}">
+                                        {{ worker.name }}
+                                    </a>
+                                </th>
+                                <td>{{ worker.get_state }}</td>
+                                <td>{{ worker.birth_date }}</td>
+                                <td>{{ worker.pid }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

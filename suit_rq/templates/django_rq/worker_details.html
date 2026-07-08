@@ -1,0 +1,84 @@
+{% extends "django_rq/base_django_rq.html" %}
+
+
+
+{% block extra_breadcrumbs %}
+    <li>
+        <span class="divider">»</span>
+        <a href="{% url 'rq_workers' queue_index %}">{{ queue.name }} Workers</a>
+    </li>
+    <li class="active">
+        <span class="divider">»</span>
+        <a href="{% url 'rq_worker_details' queue_index worker.name %}">{{ worker.name }}</a>
+    </li>
+{% endblock %}
+
+{% block content_title %}<h1>Worker Info</h1>{% endblock %}
+
+{% block content %}
+
+<div id="content-main">
+
+    <div class="module">
+
+        <table class="table table-striped table-bordered table-hover table-condensed">
+            <tbody>
+                <tr>
+                    <th>Name:</th>
+                    <td>{{ worker.name }}</td>
+                </tr>
+                <tr>
+                    <th>State:</th>
+                    <td>{{ worker.get_state }}</td>
+                </tr>
+                <tr>
+                    <th>Birth:</th>
+                    <td>{{ worker.birth_date }}</td>
+                </tr>
+                <tr>
+                    <th>Queues:</th>
+                    <td>{{ queue_names }}</td>
+                </tr>
+                <tr>
+                    <th>PID:</th>
+                    <td>{{ worker.pid }}</td>
+                </tr>
+                {% if job %}
+                    <tr>
+                        <th>Current Job:</th>
+                        <td>
+                            {{ job.func_name }}
+                            <a href="{% url 'rq_job_detail' queue_index job.id %}">
+                                {{ job.id }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if worker.successful_job_count != None %}
+
+                <tr>
+                    <th>Successful jobs count:</th>
+                    <td>{{ worker.successful_job_count }}</td>
+                </tr>
+                {% endif %}
+                {% if worker.failed_job_count != None %}
+
+                <tr>
+                    <th>Failed jobs count:</th>
+                    <td>{{ worker.failed_job_count }}</td>
+                </tr>
+                {% endif %}
+                {% if worker.total_working_time != None %}
+
+                <tr>
+                    <th>Total working time (seconds):</th>
+                    <td>{{ total_working_time }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

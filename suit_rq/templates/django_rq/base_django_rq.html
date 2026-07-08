@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'admin:index' %}">Home</a>
+        </li>
+        <li {% block rq_home_active_attr %}{% endblock %}>
+            <span class="divider">»</span>
+            <a href="{% url 'rq_home' %}">Django RQ</a>
+        </li>
+        {% block extra_breadcrumbs %}{% endblock %}
+    </ul>
+{% endblock %}
