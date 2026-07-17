@@ -4,6 +4,7 @@
 
 
 {% load static %}
+{% load suit_rq_tags %}
 
 {% block content_title %}<h1>Scheduler Managed Jobs</h1>{% endblock %}
 
@@ -58,7 +59,7 @@
                                 <td>{{ job.schedule }}</td>
                                 <td>{{ job.next_run }}</td>
                                 <td>{{ job.ended_at }}</td>
-                                <td>{{ job.get_status.value }}</td>
+                                <td>{{ job|job_status }}</td>
                                 <td>{{ job.func_name }}</td>
                             </tr>
                         {% endfor %}

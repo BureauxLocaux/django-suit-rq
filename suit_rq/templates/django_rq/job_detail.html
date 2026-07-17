@@ -1,6 +1,6 @@
 {% extends "django_rq/base_django_rq.html" %}
 
-
+{% load suit_rq_tags %}
 
 {% block extra_breadcrumbs %}
     <li>
@@ -53,7 +53,7 @@
                 </tr>
                 <tr>
                     <th>Status:</th>
-                    <td>{{ job.get_status.value }}</td>
+                    <td>{{ job|job_status }}</td>
                 </tr>
                 <tr>
                     <th>Callable:</th>
