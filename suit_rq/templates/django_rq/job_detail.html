@@ -1,6 +1,6 @@
 {% extends "django_rq/base_django_rq.html" %}
 
-
+{% load suit_rq_tags %}
 
 {% block extra_breadcrumbs %}
     <li>
@@ -53,7 +53,7 @@
                 </tr>
                 <tr>
                     <th>Status:</th>
-                    <td>{{ job.get_status.value }}</td>
+                    <td>{{ job|job_status }}</td>
                 </tr>
                 <tr>
                     <th>Callable:</th>
@@ -105,13 +105,13 @@
 
     <div class="submit-row">
         <form method="POST" action="{% url 'rq_requeue_job' queue_index job.id %}">
-            {% if job.is_failed %}
+            {% if job|job_status == 'failed' %}
                 {% csrf_token %}
                 <input type="submit" value="Requeue" class="btn btn-success" name="requeue">
             {% endif %}
             <a href="delete/" class="btn btn-danger">Delete</a>
         </form>
-        {% if job.is_queued and not job.is_failed %}
+        {% if job|job_status == 'queued' %}
             <form method = 'POST' action = "{% url 'rq_enqueue_job' queue_index job.id %}">
                 {% csrf_token %}
                 <input type="submit" value="Enqueue" class="default" name="Enqueue">

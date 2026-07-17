@@ -1,6 +1,7 @@
 {% extends "django_rq/base_django_rq.html" %}
 
 {% load static %}
+{% load suit_rq_tags %}
 
 {% block extrahead %}
     {{ block.super }}
@@ -94,7 +95,7 @@
                                     <td>{{ execution.created_at }}</td>
                                     <td>{{ execution.last_heartbeat }}</td>
                                     <td>{{ execution.job.enqueued_at }}</td>
-                                    <td>{{ execution.job.get_status.value }}</td>
+                                    <td>{{ execution.job|job_status }}</td>
                                     <td>{{ execution.job.func_name }}</td>
                                 </tr>
                             {% endfor %}
@@ -118,7 +119,7 @@
                                     {% if job_status == "Failed" or job_status == "Finished" %}
                                         <td>{{ job.ended_at }}</td>
                                     {% endif %}
-                                    <td>{{ job.get_status.value }}</td>
+                                    <td>{{ job|job_status }}</td>
                                     <td>{{ job.func_name }}</td>
                                 </tr>
                             {% endfor %}
